@@ -1,13 +1,3 @@
-""" from aocd import data
-from decouple import config
-
-AOC_SESSION = config('AOC_SESSION')
-
-import requests
-s = requests.Session()
-s.auth = ('JaviMaligno', '76321jav')
-resp = s.get('https://adventofcode.com/2020/day/1/input', cookies={'session':AOC_SESSION})
- """
 import numpy as np
 
 def int_or_empty(l):
