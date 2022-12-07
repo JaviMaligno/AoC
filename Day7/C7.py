@@ -30,16 +30,20 @@ class Dir:
     @property.setter
     def add_parent(self, parent_dir):
         self._parent = parent_dir
-
+    
     @property
     def size(self):
         return self._size
     
-    @property.setter
+    @property.setter #this is used to compute, not to set, redefine
     def compute_size(self):
         #loop throught files adding the filesizes and then through subdirectories
         # I will need to think how to really access subdirectories, maybe I will simplify this and just  throw everything into a list
-        pass
+        return sum(size for file, size in self.files.items()) + sum(self.compute_size(subdir) for subdir in self.directories.values())
+    
+    def files_size(self):
+        return sum(size for file, size in self.files.items())
+            
 
 root = Dir('/')
 current_dir = root
@@ -62,6 +66,20 @@ for command in text[1:]:
         else:
             current_dir.add_file(split[1], int(split[0]))
 
+            
+         
+def small_dirs(root):
+    if root.directories:
+        smal_subdirs = [small_dirs(subdir) for subdir in root.directories]
+        # if the files + sum of sizes of subdirs is less than 100000 add root to the list
+        # opdo not use self.compute_size because I would need to compute subdir size many times
+        # rather use self.files_size()
+     else:
+        files_size = root.files_size()
+        if files_size < 100000:
+            small_subdirs.append(root)
+            # delete child from parent and move up
+    
         
 
 
