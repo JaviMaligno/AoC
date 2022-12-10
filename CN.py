@@ -16,7 +16,7 @@ if not os.path.exists(path):
             f"text = get_input({day})\n"])
 
     with open(py_test, 'a+') as test:
-        test.writelines(["from C{day} import *\n", f'with open(r"{test_input}") as f: pass'])
+        test.writelines([f"from C{day} import *\n", f'with open(r"{test_input}") as f: pass'])
     open(test_input, 'a').close()
 
 
