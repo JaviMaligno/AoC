@@ -103,9 +103,10 @@ def dijkstra(grid, start = None):
     nodes = get_nodes(grid)
     adjacency = adjacency_dict(grid, nodes)
     lengths = initial_lengths(nodes, start)
-    visited_nodes = set()
     unvisited_nodes = set(nodes)
-
+    #unvisited_nodes = grid*True # more efficient if I create a map or array inn which map[node] = True if (un)visited and false otherwise
+    # this requires changing the while. Using any will be just as slow. 
+    # Use a priority queue instead
     while unvisited_nodes:
         current_dict = {node : length for node, length in lengths.items()  if node in unvisited_nodes}
         current_node = min(current_dict, key = current_dict.get)
