@@ -42,6 +42,7 @@ class Horizontal(Rock):
         self.height = 1
         self.column = np.array([2,3,4,5])
         self.rock = np.ones((self.height,4))
+        self.name =  "Horizontal"
         super().__init__()
 
     def can_move_left(self, row, board):
@@ -70,6 +71,7 @@ class Vertical(Rock):
         self.height = 4
         self.rock = np.ones((self.height,1))
         self.column = 2
+        self.name = "Vertical"
         super().__init__()
 
     def can_move_left(self, row, board):
@@ -98,6 +100,7 @@ class Box(Rock):
         self.height = 2
         self.rock = np.ones((self.height,self.height))
         self.column = np.array([2,3])
+        self.name = "Box"
         super().__init__()
 
     def can_move_left(self, row, board):
@@ -126,6 +129,7 @@ class Corner(Rock):
         self.height = 3
         self.column = np.array([2,3,4])
         self.rock = np.array([[0,0,1],[0,0,1],[1,1,1]])
+        self.name = "Corner"
         super().__init__()
 
     def can_move_left(self, row, board):
@@ -155,6 +159,7 @@ class Star(Rock):
         self.height = 3
         self.column = np.array([2,3,4])
         self.rock = np.array([[0,1,0],[1,1,1],[0,1,0]])
+        self.name = "Star"
         super().__init__()
 
     def can_move_left(self, row, board):
