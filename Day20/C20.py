@@ -16,28 +16,44 @@ def mixing(numbers, position_dict):
         number = numbers[position_dict[index]]
         if number == 0:
             continue
-            """ elif number < 0:
+        else:
             current_index = position_dict[index]
-            cycles = (number+current_index) // size
-            left = numbers[:current_index]
-            right = numbers[current_index+1:]
-            new_index = (number+current_index+cycles) % size-1 
-            if new_index == 6:
-                new_index = 0
+            new_index = (number+current_index) % (size-1) 
+            numbers.insert(new_index,numbers.pop(current_index))
             diff = new_index - current_index 
             new_dict = dict(zip(range(size), range(size)))
             if diff > 0:
-                right_index = diff
-                right.insert(right_index, number)
-                numbers = left+right
                 for i in range(current_index+1,new_index+1):
                     new_dict[i] -=1 
             else:
-                left_index = new_index
-                left.insert(left_index,number)
-                numbers = left+right
+        
                 for i in range(new_index,current_index):
-                    new_dict[i] +=1"""
+                    new_dict[i] +=1
+            new_dict[current_index] = new_index
+            position_dict = composition(position_dict, new_dict)
+        """ elif number < 0:
+            current_index = position_dict[index]
+            #cycles = (number+current_index) // size
+            #left = numbers[:current_index]
+            #right = numbers[current_index+1:]
+            new_index = (number+current_index) % (size-1) 
+            #if new_index == 0:
+            #    new_index = 6
+            diff = new_index - current_index 
+            numbers.insert(new_index,numbers.pop(current_index))
+            new_dict = dict(zip(range(size), range(size)))
+            if diff > 0:
+                #right_index = diff
+                #right.insert(right_index, number)
+                #numbers = left+right
+                for i in range(current_index+1,new_index+1):
+                    new_dict[i] -=1 
+            else:
+                #left_index = new_index
+                #left.insert(left_index,number)
+                #numbers = left+right
+                for i in range(new_index,current_index):
+                    new_dict[i] +=1
         else:
             current_index = position_dict[index]
             cycles = (number+current_index) // size
@@ -59,7 +75,7 @@ def mixing(numbers, position_dict):
                 for i in range(new_index,current_index):
                     new_dict[i] +=1
             new_dict[current_index] = new_index
-            position_dict = composition(position_dict, new_dict)
+            position_dict = composition(position_dict, new_dict) """
             
     return numbers, position_dict
     
@@ -89,4 +105,4 @@ def multiple_mixing(text, KEY = 811589153, times = 10):
 #811589153 % 7 = 4
 # quotient 115941307
 
-#print(multiple_mixing(text, times = 10))
+print(multiple_mixing(text, times = 10))
