@@ -146,3 +146,221 @@ def path(text, initial_state = 0):
 #print(path(text))
 
 # For part 2, subdivide into the 6 faces and define movement to take into account the transition
+
+def faces(maps,rocks):
+    map1 = maps[:50, 50:100]
+    rock1 = rocks[:50, 50:100]
+    map2 = maps[:50, 100:150]
+    rock2 = rocks[:50, 100:150]
+    map3 = maps[50:100, 50:100]
+    rock3 = rocks[50:100, 50:100]
+    map4 = maps[100:150, :50]
+    rock4 = rocks[100:150, :50]
+    map5 = maps[100:150, 50:100]
+    rock5 = rocks[100:150, 50:100]
+    map6 = maps[150:200, :50]
+    rock6 = rocks[150:200, :50]
+    map_list = [map1, map2,map3, map4,map5, map6]
+    rock_list = [rock1, rock2, rock3, rock4, rock5, rock6]
+    return map_list, rock_list
+
+def face_transition(face, state, location):
+    if face == 0:
+        if state == 0:
+            next_face = 1
+            next_state = 0
+            next_location = location[0], location[1]-49
+        elif state == 1:
+            next_face = 2
+            next_state = 1
+            next_location = 49 - location[0], location[1]
+        elif state == 2:
+            next_face = 3
+            next_state = 0
+            next_location = 49 - location[0], location[1]
+        else:
+            next_face = 5
+            next_state = 0
+            next_location = location[1],location[0]
+    elif face == 1:
+        if state == 0:
+            next_face = 4 
+            next_state = 2
+            next_location = 49 - location[0], location[1]
+        elif state == 1:
+            next_face = 2
+            next_state = 2
+            next_location = location[1], location[0]
+        elif state == 2:
+            next_face = 0
+            next_state = 2
+            next_location = location[0], 49 - location[1]
+        else:
+            next_face = 5
+            next_state = 3
+            next_location = 49-location[0], location[1]
+    elif face == 2:
+        if state == 0:
+            next_face = 1
+            next_state = 3
+            next_location = location[1], location[0]
+        elif state == 1:
+            next_face = 4
+            next_state = 1
+            next_location = 49 - location[0], location[1]
+        elif state == 2:
+            next_face = 3
+            next_state = 1
+            next_location = location[1], location[0]
+        else:
+            next_face = 0
+            next_state = 3
+            next_location = 49 - location[0], location[1]
+    elif face == 3:
+        if state == 0:
+            next_face = 4
+            next_state = 0
+            next_location = location[0], 49 - location[0]
+        elif state == 1:
+            next_face = 5
+            next_state = 1
+            next_location = 49 - location[0], location[1]
+        elif state == 2:
+            next_face = 0
+            next_state = 0
+            next_location = 49 - location[0], location[1]
+        else:
+            next_face = 2
+            next_state = 0
+            next_location = location[1], location[0]
+    elif face == 4:
+        if state == 0:
+            next_face = 1
+            next_state = 2
+            next_location = 49 - location[0], location[1]
+        elif state == 1:
+            next_face = 5
+            next_state = 2
+            next_location = location[1], location[0]
+        elif state == 2:
+            next_face = 3
+            next_state = 2
+            next_location = location[0], 49 - location[1]
+        else:
+            next_face = 2
+            next_state = 3
+            next_location = 49 - location[0], location[1]
+    elif face == 5:
+        if state == 0:
+            next_face = 4
+            next_state = 3
+            next_location = location[1], location[0]
+        elif state == 1:
+            next_face = 1
+            next_state = 1
+            next_location = 49 - location[0], location[1]
+        elif state == 2:
+            next_face = 0
+            next_state = 1
+            next_location = location[1], location[0]
+        else:
+            next_face = 3
+            next_state = 3
+            next_location = 49 - location[0], location[1]
+    return next_face, next_state, next_location
+          
+
+
+
+def cube_move(steps, state, position, map_list, rock_list):
+    dir = 1 if state < 2 else -1
+    vertical = state % 2
+    face = position[2]
+    row, column = position[0], position[1]
+    face_map = map_list[face]
+    rock_map = rock_list[face]
+    way = face_map[:,column] if vertical else face_map[row, :] 
+    way_length = len(way)
+    rock_way = rock_map[:,column] if vertical else rock_map[row, :]
+    way_position = row if vertical else column
+    if dir > 0:
+        half_rocks = [i-1 for i in range(way_position+1, way_length) if rock_way[i]]
+        half_way = way[way_position+1:]
+    else:
+        half_way = way[:way_position]
+        half_rocks = [i+1 for i in range(way_position) if rock_way[i]][::-1] #so that the first rock I encounter is the first element
+    half = len(half_way)
+    if steps > half:
+        if half_rocks: # I am checking dir twice, this code is not efficient
+            next_position = half_rocks[0] 
+            return ((next_position, column, face), state) if vertical else ((row, next_position, face),state)
+        else:
+            next_position = way_length-1 if dir > 0 else 0
+            location = next_position, column if vertical else row, next_position
+            steps -= half
+            next_face, next_state, next_location = face_transition(face, state, location)
+            next_rock_map = rock_list[next_face]
+            if next_rock_map[next_location]:
+                return ((next_position, column, face),state) if vertical else ((row, next_position, face),state)
+            else:
+                # cube_move on the next face
+                position = next_location[0], next_location[1], next_face
+                return cube_move(steps-1, next_state, position, map_list, rock_list)
+    else:
+        potential_position = way_position+dir*steps
+        if dir > 0:
+            next_position = min(potential_position, half_rocks[0]) if half_rocks else potential_position
+        else:
+            next_position = max(potential_position, half_rocks[0]) if half_rocks else potential_position
+        position = (next_position, column, face) if vertical else (row, next_position, face)
+        return position, state
+        
+        
+
+
+""" def cube_movement(steps, state, position, map_list,  rock_list):
+    if state == 0:
+        position = cube_move(steps, position, map_list, rock_list, horizontal = True, dir = 1)
+    elif state == 1:
+        position = cube_move(steps, position, map_list, rock_list, horizontal = False, dir = 1)
+    elif state == 2:
+        position = cube_move(steps, position, map_list, rock_list, horizontal = True, dir = -1)
+    elif state == 3:
+        position = cube_move(steps, position, map_list, rock_list, horizontal = False, dir = -1) """
+
+def compute_position(position):
+    face_row = position[0]
+    face_column = position[1]
+    face = position[2]
+    if face == 0:
+        face_column += 50
+    elif face == 1:
+        face_column += 100
+    elif face == 2:
+        face_column += 50
+        face_row +=50
+    elif face == 3:
+        face_row += 100
+    elif face == 4:
+        face_row += 100
+        face_column += 50
+    else:
+        face_row += 150
+    return face_row+1, face_column+1    
+    
+
+
+def cube_path(text):
+    directions = {'R':1,'L':-1, 'C':0}
+    state = 0
+    maps, instructions, rocks = map_instructions(text)
+    map_list,rock_list = faces(maps, rocks)
+    position = (0,0,0)
+    for instruction in instructions:
+        state = (state + directions[instruction[0]]) % 4
+        position, state = cube_move(instruction[1], state, position, map_list, rock_list)
+    row,column = compute_position(position)
+    return 1000*row + 4*column + state
+
+
+print(cube_path(text))
