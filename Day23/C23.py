@@ -20,18 +20,22 @@ def frame(grid):
 def round(grid, elves, t):
     proposed_positions = defaultdict(int)
     elves_propose = {}
-    for elve_index in elves:
-        proposed_position = propose_position(elve_index, grid, t)
-        elves_propose[elve_index] = proposed_position
+    move = False
+    for elf_index in elves:
+        proposed_position = propose_position(elf_index, grid, t)
+        elves_propose[elf_index] = proposed_position
         proposed_positions[proposed_position]+=1
-    for i,elve_index in enumerate(elves):
-        potential_position = elves_propose[elve_index]
+    for i,elf_index in enumerate(elves):
+        potential_position = elves_propose[elf_index]
         if proposed_positions[potential_position]  < 2:
-            grid[elve_index] = 0
-            grid[proposed_position] = 1
-            elves[i] = potential_position[0], potential_position[1]
-    grid, elves = add_frame(grid, elves)
-    return grid, elves
+            # slightly faster if I check if the potential position is different first
+            if potential_position != elf_index:
+                grid[elf_index] = 0
+                grid[potential_position] = 1
+                elves[i] = potential_position
+                move = True  
+    grid, elves = add_frame(grid, elves) 
+    return grid, elves, move
 
 def add_frame(grid, elves):
     shape = grid.shape
@@ -73,12 +77,12 @@ def sort_list(priorities, t):
     else:
         return (east_side, north_side, south_side, west_side), (east, north, south, west)
 
-def propose_position(elve_index, grid, t):
+def propose_position(elf_index, grid, t):
     # DEBUG, SOME ELVES ARE APPEARING ON THE FRAME
-    north_side, north = grid[elve_index[0]+1, elve_index[1]-1:elve_index[1]+2], (elve_index[0]+1, elve_index[1])
-    south_side, south = grid[elve_index[0]-1, elve_index[1]-1:elve_index[1]+2], (elve_index[0]-1, elve_index[1])
-    west_side, west = grid[elve_index[0]-1:elve_index[0]+2, elve_index[1]-1], (elve_index[0], elve_index[1]-1)
-    east_side , east = grid[elve_index[0]-1:elve_index[0]+2, elve_index[1]+1], (elve_index[0], elve_index[1]+1)
+    north_side, north = grid[elf_index[0]-1, elf_index[1]-1:elf_index[1]+2], (elf_index[0]-1, elf_index[1])
+    south_side, south = grid[elf_index[0]+1, elf_index[1]-1:elf_index[1]+2], (elf_index[0]+1, elf_index[1])
+    west_side, west = grid[elf_index[0]-1:elf_index[0]+2, elf_index[1]-1], (elf_index[0], elf_index[1]-1)
+    east_side , east = grid[elf_index[0]-1:elf_index[0]+2, elf_index[1]+1], (elf_index[0], elf_index[1]+1)
     # I wanted to dynamically put the first element at the end after each round, but for that I would need to define separate methods that compute the sides, and I am too lazy 
     priority, direction = sort_list(((north_side, north),(south_side, south), (west_side, west), (east_side, east)), t)
     if np.any(priority):
@@ -89,18 +93,30 @@ def propose_position(elve_index, grid, t):
             proposed_position = direction[1]
         elif not np.any(priority[2]):
             proposed_position = direction[2]
-        else:
+        elif not np.any(priority[3]):
             proposed_position = direction[3]
+        else: 
+            proposed_position = elf_index
     else:
-        proposed_position = elve_index
+        proposed_position = elf_index
     return proposed_position
-def progress(text, rounds = 10):
-    grid, elves = make_grid(text)
-    for t in range(rounds):
-        grid, elves = round(grid, elves, t) 
-    rows, columns = grid.shape
-    rectangle = grid[1:rows-2, 1:columns-2]
-    empty = len(np.where( rectangle == 0)[0]) #np where gives the positions as two arrays of coordinates, I just need the amount of coordinates
-    return empty
 
-#print(progress(text))
+def progress(text, rounds = None):
+    grid, elves = make_grid(text)
+    move = True
+    if rounds:
+        for t in range(rounds):
+            grid, elves, move = round(grid, elves, t) 
+        rows, columns = grid.shape
+        #rectangle = grid[1:rows-2, 1:columns-2]
+        #empty = len(np.where( rectangle == 0)[0]) #np where gives the positions as two arrays of coordinates, I just need the amount of coordinates
+        empty = (grid.shape[0]-2) * (grid.shape[1]-2) - len(elves)
+        return empty,move
+    else:
+        t = 0
+        while move:
+            grid, elves, move = round(grid, elves, t)
+            t += 1
+        return t,grid
+
+print(progress(text)[0])
