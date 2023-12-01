@@ -57,7 +57,7 @@ def sum_two_digit_numbers(text):
                         break
                 else:
                     i += 1
-        print(first_digit,last_digit)
+       
         # Add the two-digit number to the total
         if first_digit is not None and last_digit is not None:
             two_digit_num = int(first_digit + last_digit)
@@ -67,5 +67,3 @@ def sum_two_digit_numbers(text):
 
 
 
-
-print(sum_two_digit_numbers(text))
