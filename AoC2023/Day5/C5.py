@@ -4,6 +4,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from get_data import get_input
 text = get_input(5)
 
+"""
+Inefficient
+
 def parse_input(input_text):
     # Split the input text into lines
     lines = input_text.split('\n')
@@ -50,8 +53,56 @@ def parse_input(input_text):
     if current_map:
         maps[current_map[0]] = current_map[1]
 
+    return seeds, maps """
+ 
+# def parse_input(input_string):
+#     lines = input_string.splitlines()
+#     seeds = list(map(int, lines[0].split(':')[1].strip().split()))
+#     maps = {}
+#     current_map = None
+#     for line in lines[1:]:
+#         if 'map:' in line:
+#             current_map = line.split(':')[0]
+#             maps[current_map] = []
+#         elif line:
+#             maps[current_map].append(list(map(int, line.split())))
+#     return seeds, maps
+
+def parse_input(input_text):
+    lines = input_text.splitlines()
+    seeds = list(map(int, lines[0].split(':')[1].strip().split()))
+    maps = {}
+    current_map = None
+    for line in lines[1:]:
+        if 'map:' in line:
+            current_map = line.split(':')[0]
+            maps[current_map] = []
+        elif line:
+            maps[current_map].append(list(map(int, line.split())))
     return seeds, maps
 
+def find_location(seed, maps):
+    current_value = seed
+    for map_name in ['seed-to-soil map', 'soil-to-fertilizer map', 'fertilizer-to-water map', 'water-to-light map', 'light-to-temperature map', 'temperature-to-humidity map', 'humidity-to-location map']:
+        current_map = maps[map_name]
+        for dest_start, src_start, length in current_map:
+            if src_start <= current_value < src_start + length:
+                current_value = dest_start + (current_value - src_start)
+                break
+    return current_value
+
+
+def lowest_location(seeds, maps):
+    # Find the location for each seed
+    locations = [find_location(seed, maps) for seed in seeds]
+
+    # Find the lowest location
+    lowest_location = min(locations)
+
+    return lowest_location
+
+""" 
+Inefficient
 
 def find_locations(seeds, maps):
     # Initialize an empty list to hold the locations
@@ -76,6 +127,38 @@ def find_locations(seeds, maps):
 
     # Return the lowest location
     return min(locations)
+ """
+#seeds, maps = parse_input(text)
+#print(lowest_location(seeds, maps))
 
-seeds, maps = parse_input(text)
-print(find_locations(seeds, maps))
+def parse_input2(input_text):
+    lines = input_text.splitlines()
+    seed_ranges = list(map(int, lines[0].split(':')[1].strip().split()))
+    seeds = []
+    for i in range(0, len(seed_ranges), 2):
+        seeds.extend(range(seed_ranges[i], seed_ranges[i] + seed_ranges[i+1]))
+    maps = {}
+    current_map = None
+    for line in lines[1:]:
+        if 'map:' in line:
+            current_map = line.split(':')[0] 
+            maps[current_map] = []
+        elif line:
+            maps[current_map].append(list(map(int, line.split())))
+    return seeds, maps
+
+def find_location2(seeds, maps):
+    min_location = float('inf')
+    for seed in seeds:
+        current_value = seed
+        for map_name in ['seed-to-soil map', 'soil-to-fertilizer map', 'fertilizer-to-water map', 'water-to-light map', 'light-to-temperature map', 'temperature-to-humidity map', 'humidity-to-location map']:
+            current_map = maps[map_name]
+            for dest_start, src_start, length in current_map:
+                if src_start <= current_value < src_start + length:
+                    current_value = dest_start + (current_value - src_start)
+                    break
+        min_location = min(min_location, current_value)
+    return min_location
+
+seeds, maps = parse_input2(text)
+print(find_location2(seeds, maps))
