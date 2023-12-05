@@ -132,11 +132,9 @@ def find_locations(seeds, maps):
 #print(lowest_location(seeds, maps))
 
 def parse_input2(input_text):
-    lines = input_text.splitlines()
+    lines = input_text.split('\n')
     seed_ranges = list(map(int, lines[0].split(':')[1].strip().split()))
-    seeds = []
-    for i in range(0, len(seed_ranges), 2):
-        seeds.extend(range(seed_ranges[i], seed_ranges[i] + seed_ranges[i+1]))
+    seeds = [(seed_ranges[i], seed_ranges[i+1]) for i in range(0, len(seed_ranges), 2)]
     maps = {}
     current_map = None
     for line in lines[1:]:
@@ -147,18 +145,21 @@ def parse_input2(input_text):
             maps[current_map].append(list(map(int, line.split())))
     return seeds, maps
 
-def find_location2(seeds, maps):
+def find_location2(seed_ranges, maps):
     min_location = float('inf')
-    for seed in seeds:
-        current_value = seed
-        for map_name in ['seed-to-soil map', 'soil-to-fertilizer map', 'fertilizer-to-water map', 'water-to-light map', 'light-to-temperature map', 'temperature-to-humidity map', 'humidity-to-location map']:
-            current_map = maps[map_name]
-            for dest_start, src_start, length in current_map:
-                if src_start <= current_value < src_start + length:
-                    current_value = dest_start + (current_value - src_start)
-                    break
-        min_location = min(min_location, current_value)
+    for seed_start, seed_length in seed_ranges:
+        for seed in range(seed_start, seed_start + seed_length):
+            current_value = seed
+            for map_name in ['seed-to-soil map', 'soil-to-fertilizer map', 'fertilizer-to-water map', 'water-to-light map', 'light-to-temperature map', 'temperature-to-humidity map', 'humidity-to-location map']:
+                current_map = maps[map_name]
+                for dest_start, src_start, length in current_map:
+                    if src_start <= current_value < src_start + length:
+                        current_value = dest_start + (current_value - src_start)
+                        break
+            min_location = min(min_location, current_value)
     return min_location
 
+
 seeds, maps = parse_input2(text)
-print(find_location2(seeds, maps))
+#print(find_location2(seeds, maps))
+print(seeds)
